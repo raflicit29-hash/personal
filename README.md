@@ -25,3 +25,8 @@ Paket ini menyegarkan antarmuka MR ALL IN Personal dengan dashboard dark neon, i
 - Tidak ada Google Fonts eksternal agar antarmuka tidak memerlukan request font pihak ketiga.
 - Paket belum diuji langsung pada proyek Supabase aktif. Setelah dipasang, uji login, pencatatan akun/transaksi, transfer, laporan, target/setoran, anggaran, utang/pembayaran, ekspor, dan pemulihan backup.
 - Business V2 tidak disentuh; integrasi otomatis Business → Personal belum diaktifkan.
+
+
+## Integrasi MR ALL IN Business → Personal
+
+Modul WD/Gaji Owner di Business dapat mengirim WD baru ke `personal_transactions` sebagai `income` dengan kategori `Gaji/WD dari bisnis`, sumber `business_transfer`, dan `source_transfer_id` UUID unik. Sambungkan dari Business menggunakan Project URL dan publishable/anon key yang sama dengan konfigurasi Personal, login dengan akun Personal, lalu pilih rekening penerima. Password tidak disimpan oleh modul Business. Pastikan migration `001_personal_mvp.sql` sudah pernah dijalankan pada proyek Supabase Personal. WD lama tidak diimpor otomatis; sinkronkan hanya transaksi baru atau gunakan tombol coba ulang untuk WD yang berstatus pending.
