@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#071126">
+  <meta name="description" content="MR ALL IN Personal — kelola keuangan, tabungan, dan tujuan pribadimu.">
+  <title>MR ALL IN Personal</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="#top" aria-label="MR ALL IN Personal beranda">
+    <span class="brand-mark" aria-hidden="true">👑</span>
+    <span class="brand-copy"><b>MR ALL IN</b><small>PERSONAL FINANCE</small></span>
+  </a>
+  <div class="topbar-right"><span class="privacy-chip"><span class="status-dot"></span> RUANG PRIBADI</span><span id="state" class="state-pill">Belum login</span></div>
+</header>
+<main id="top">
+  <section class="intro-hero">
+    <div class="hero-copy">
+      <span class="eyebrow"><span class="sparkle">✦</span> YOUR MONEY, YOUR FUTURE</span>
+      <h1>Pelan-pelan, bro.<br><span>Impianmu makin dekat.</span></h1>
+      <p>Kelola uang hari ini, bangun hidup yang kamu inginkan besok. Satu langkah kecil tetap berarti.</p>
+      <div class="hero-tags"><span>✦ Lebih sadar</span><span>↗ Lebih terarah</span><span>♡ Tetap konsisten</span></div>
+    </div>
+    <div class="hero-art" aria-hidden="true"><div class="hero-orbit orbit-one"></div><div class="hero-orbit orbit-two"></div><div class="hero-coin coin-one">✦</div><div class="hero-coin coin-two">Rp</div><div class="hero-mascot">🤖</div><div class="hero-bubble">Semangat!<br><b>Sedikit demi sedikit 💙</b></div></div>
+  </section>
+
+  <section id="loginPanel" class="panel login-panel">
+    <div class="login-heading"><span class="section-icon violet">🔐</span><div><h2>Koneksi & login Supabase</h2><p>Konfigurasi ini disimpan lokal di perangkat/browser kamu.</p></div></div>
+    <div class="login-fields">
+      <label>Project URL<input id="url" placeholder="https://project-id.supabase.co" autocomplete="url"></label>
+      <label>Publishable / anon key<input id="key" placeholder="sb_publishable_..." autocomplete="off"></label>
+      <div class="two"><label>Email<input id="email" type="email" autocomplete="username"></label><label>Password<input id="password" type="password" autocomplete="current-password"></label></div>
+    </div>
+    <div class="login-actions"><button id="save" class="secondary">Simpan konfigurasi</button><button id="login" class="primary-button">Masuk ke ruang pribadi <span>→</span></button><button id="logout" class="secondary hidden">Keluar</button></div>
+    <p id="msg" class="status-message" role="status" aria-live="polite"></p>
+    <p class="micro-note">🔒 Gunakan publishable/anon key saja di browser. Jangan tempelkan secret atau service-role key.</p>
+  </section>
+
+  <div id="app" class="app-layout hidden">
+    <aside class="sidebar" aria-label="Navigasi utama">
+      <div class="sidebar-title"><span>🌌</span><div><b>FINANCE SPACE</b><small>perjalananmu dimulai</small></div></div>
+      <nav class="side-nav">
+        <a href="#overview" class="nav-link active"><span>🏠</span>Beranda</a>
+        <a href="#transactionsPanel" class="nav-link"><span>🧾</span>Transaksi</a>
+        <a href="#accountPanel" class="nav-link"><span>🏦</span>Rekening</a>
+        <a href="#transferPanel" class="nav-link"><span>🔁</span>Transfer</a>
+        <a href="#analysisPanel" class="nav-link"><span>📊</span>Analisis</a>
+        <a href="#savingsPanel" class="nav-link"><span>🐷</span>Tabungan impian</a>
+        <a href="#budgetPanel" class="nav-link"><span>🎯</span>Anggaran</a>
+        <a href="#debtPanel" class="nav-link"><span>🧡</span>Utang pribadi</a>
+        <a href="#billsPanel" class="nav-link"><span>🧾</span>Tagihan rutin</a>
+        <a href="#backupPanel" class="nav-link"><span>🛡️</span>Backup & data</a>
+      </nav>
+      <div class="sidebar-motivation"><span class="motivation-emoji">🚀</span><b>Kecil hari ini,<br>lebih baik nanti.</b><small>Jaga ritme. Kamu sedang membangun masa depanmu.</small></div>
+    </aside>
+
+    <div class="app-main">
+      <div id="appStatus" class="app-status hidden" role="status" aria-live="polite"></div>
+      <section class="welcome-strip" id="overview">
+        <div><span class="eyebrow">✦ FINANCIAL FREEDOM JOURNEY</span><h2><span id="greeting">Selamat datang kembali,</span> <span class="gradient-text">Pejuang Finansial!</span></h2><p>Siap bikin keputusan yang lebih baik hari ini?</p></div>
+        <a class="pill-link" href="#transactionsPanel">＋ Catat transaksi</a>
+      </section>
+
+      <section class="metrics main-metrics" id="overviewMetrics" aria-label="Ringkasan keuangan">
+        <article class="metric-card balance-card"><div class="metric-top"><span>💎 Total saldo pribadi</span><span class="metric-orb">✦</span></div><strong id="balance">Rp0</strong><small>Saldo nyata dari akun aktif</small><div class="metric-sparkline" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></article>
+        <article class="metric-card available-card"><div class="metric-top"><span>🪙 Saldo tersedia</span><span class="metric-symbol">◎</span></div><strong id="availableBalance">Rp0</strong><small id="availableHint">Setelah alokasi tabungan</small></article>
+        <article class="metric-card income-card"><div class="metric-top"><span>🟢 Pemasukan periode</span><span class="metric-symbol">↘</span></div><strong id="income">Rp0</strong><small>Sesuai periode laporan</small></article>
+        <article class="metric-card expense-card"><div class="metric-top"><span>🌺 Pengeluaran periode</span><span class="metric-symbol">↗</span></div><strong id="expense">Rp0</strong><small>Sesuai periode laporan</small></article>
+      </section>
+
+      <section class="quick-action-section">
+        <div class="section-heading"><div><span class="eyebrow">MULAI DARI SINI</span><h2>Aksi cepat ⚡</h2></div><span class="soft-label">Pilih satu, selesaikan satu</span></div>
+        <div class="quick-actions">
+          <a href="#transactionsPanel" class="quick-card qa-income" data-quick-type="income"><span>⬇️</span><b>Pemasukan</b><small>Uang masuk</small></a>
+          <a href="#transactionsPanel" class="quick-card qa-expense" data-quick-type="expense"><span>🧾</span><b>Pengeluaran</b><small>Catat belanja</small></a>
+          <a href="#transferPanel" class="quick-card qa-transfer"><span>🔁</span><b>Transfer</b><small>Pindah saldo</small></a>
+          <a href="#savingsPanel" class="quick-card qa-saving"><span>🐷</span><b>Menabung</b><small>Tambah setoran</small></a>
+          <a href="#budgetPanel" class="quick-card qa-budget"><span>🎯</span><b>Anggaran</b><small>Jaga batas</small></a>
+          <a href="#billsPanel" class="quick-card qa-bill"><span>🧾</span><b>Tagihan</b><small>Bayar tepat waktu</small></a>
+          <a href="#debtPanel" class="quick-card qa-debt"><span>🤝</span><b>Utang</b><small>Cicil atau lunasi</small></a>
+          <a href="#analysisPanel" class="quick-card qa-report"><span>📈</span><b>Laporan</b><small>Lihat progres</small></a>
+        </div>
+      </section>
+
+      <section class="panel section-panel" id="accountPanel">
+        <div class="section-heading"><div><span class="eyebrow">TEMPAT UANGMU BERADA</span><h2><span class="section-icon cyan">🏦</span>Akun pribadi</h2></div><span class="soft-label">Saldo per akun</span></div>
+        <form id="af" class="three form-grid"><label>Nama akun<input id="aname" required placeholder="Dompet pribadi / BCA / SeaBank / blu"></label><label>Jenis<select id="atype"><option value="cash">Tunai/dompet</option><option value="bank">Bank</option><option value="savings">Tabungan</option><option value="ewallet">E-wallet</option></select></label><label>Saldo awal terverifikasi<input id="opening" type="number" min="0" value="0" required></label><button class="primary-button">＋ Tambah akun</button></form>
+        <div id="accounts" class="data-list"></div>
+      </section>
+
+      <section class="panel section-panel" id="transactionsPanel">
+        <div class="section-heading"><div><span class="eyebrow">CATAT DENGAN JELAS</span><h2><span class="section-icon pink">🧾</span>Catat transaksi</h2></div><span class="soft-label">Data aktual, bukan tebakan</span></div>
+        <form id="tf" class="three form-grid"><label>Tanggal<input id="date" type="date" required></label><label>Jenis<select id="type"><option value="expense">Pengeluaran</option><option value="income">Pemasukan</option></select></label><label>Akun<select id="account" required></select></label><label>Kategori<select id="category"><option>Makan</option><option>Transportasi/bensin</option><option>Tagihan rutin</option><option>Utang/cicilan</option><option>Belanja pribadi</option><option>Gaji/WD dari bisnis</option><option>Tabungan</option><option>Lainnya</option></select></label><label>Nominal<input id="amount" type="number" min="1" required></label><label>Catatan<input id="note" maxlength="240" placeholder="Opsional"></label><button class="primary-button">Simpan transaksi <span>→</span></button></form>
+        <p class="inline-note">💡 WD dari Business hanya dihitung sebagai pemasukan pribadi kalau uangnya benar-benar sudah diterima. Integrasi otomatis Business belum aktif.</p>
+      </section>
+
+      <section class="panel section-panel" id="transferPanel">
+        <div class="section-heading"><div><span class="eyebrow">PINDAH UANG, BUKAN PENDAPATAN BARU</span><h2><span class="section-icon blue">🔁</span>Transfer antar-rekening</h2></div><span class="soft-label">Internal</span></div>
+        <form id="transferForm" class="three form-grid"><label>Tanggal<input id="transferDate" type="date" required></label><label>Rekening asal<select id="fromAccount" required></select></label><label>Rekening tujuan<select id="toAccount" required></select></label><label>Nominal<input id="transferAmount" type="number" min="1" required></label><label>Catatan<input id="transferNote" maxlength="240" placeholder="Contoh: pindah dana ke SeaBank"></label><button class="primary-button">↔ Catat transfer</button></form>
+        <p class="inline-note">Transfer mengurangi rekening asal dan menambah rekening tujuan. Nilainya tidak menambah total pemasukan atau pengeluaran.</p>
+      </section>
+
+      <section class="panel section-panel" id="analysisPanel">
+        <div class="section-heading"><div><span class="eyebrow">LIHAT POLA, BUKAN CUMA ANGKA</span><h2><span class="section-icon violet">📊</span>Laporan keuangan</h2></div><label class="period-label">Periode<select id="reportPeriod"><option value="day">Hari ini</option><option value="week" selected>7 hari terakhir</option><option value="month">Bulan ini</option><option value="year">Tahun ini</option></select></label></div>
+        <div class="metrics report-metrics"><article class="mini-metric"><small>🟢 Pemasukan</small><strong id="reportIncome">Rp0</strong></article><article class="mini-metric"><small>🌺 Pengeluaran</small><strong id="reportExpense">Rp0</strong></article><article class="mini-metric"><small>✨ Selisih bersih</small><strong id="reportNet">Rp0</strong></article></div>
+        <div class="metrics report-metrics"><article class="mini-metric"><small>🔁 Transfer internal</small><strong id="reportTransfers">Rp0</strong></article><article class="mini-metric"><small>🐷 Alokasi tabungan bersih</small><strong id="reportSavings">Rp0</strong></article><article class="mini-metric"><small>🧾 Jumlah transaksi</small><strong id="reportCount">0</strong></article><article class="mini-metric"><small>🗓️ Periode</small><strong id="reportRange">7 hari terakhir</strong></article></div>
+        <h3 class="subheading">📈 Tren arus kas</h3><div id="cashflowChart" class="cashflow-chart"><p class="muted">Grafik akan muncul dari transaksi pada periode yang dipilih.</p></div>
+        <h3 class="subheading">Rincian pengeluaran</h3><div id="reportCategories" class="data-list"><p class="muted">Belum ada pengeluaran pada periode ini.</p></div>
+      </section>
+
+      <section class="panel section-panel savings-panel" id="savingsPanel">
+        <div class="section-heading"><div><span class="eyebrow">BANGUN ALASAN UNTUK TERUS BERJUANG</span><h2><span class="section-icon gold">🌠</span>Tabungan impian</h2></div><span class="soft-label">Nominal & progres milikmu</span></div>
+        <div class="dream-intro"><div><h3>Bayangkan kamu sampai di sana ✨</h3><p>Mulai dari satu tujuan. Pilih inspirasi di bawah, lalu tentukan target yang realistis buat kondisimu.</p></div><span class="dream-intro-icon">🚀</span></div>
+        <div class="dream-grid">
+          <button type="button" class="dream-card dream-house" data-goal-preset="Rumah Impian"><img src="assets/img/dream-home.jpg" alt="Ilustrasi rumah impian" loading="lazy"><span class="dream-type">🏡 TUJUAN BESAR</span><b>Rumah Impian</b><small>Bangun pondasi masa depanmu</small><span class="dream-cta">Pilih inspirasi <span>↗</span></span></button>
+          <button type="button" class="dream-card dream-travel" data-goal-preset="Liburan Impian"><img src="assets/img/dream-japan.jpg" alt="Ilustrasi liburan impian" loading="lazy"><span class="dream-type">🌸 PENGALAMAN</span><b>Liburan Impian</b><small>Kasih ruang buat menikmati hidup</small><span class="dream-cta">Pilih inspirasi <span>↗</span></span></button>
+          <button type="button" class="dream-card dream-car" data-goal-preset="Kendaraan Impian"><img src="assets/img/dream-car.jpg" alt="Ilustrasi kendaraan impian" loading="lazy"><span class="dream-type">🏎️ KEMANDIRIAN</span><b>Kendaraan Impian</b><small>Rencanakan tanpa mengganggu modal</small><span class="dream-cta">Pilih inspirasi <span>↗</span></span></button>
+          <button type="button" class="dream-card dream-setup" data-goal-preset="Upgrade Setup"><img src="assets/img/dream-setup.jpg" alt="Ilustrasi laptop dan setup impian" loading="lazy"><span class="dream-type">💻 UPGRADE DIRI</span><b>Upgrade Setup</b><small>Investasi untuk skill dan karya</small><span class="dream-cta">Pilih inspirasi <span>↗</span></span></button>
+        </div>
+        <p class="dream-disclaimer">Gambar dan kategori di atas hanya inspirasi. Tidak ada nominal target contoh yang otomatis dianggap sebagai saldo atau kemampuan menabungmu.</p>
+        <div class="goal-form-wrap"><h3>🎯 Buat target tabunganmu</h3><form id="goalForm" class="three form-grid"><label>Nama target<input id="goalName" required maxlength="100" placeholder="Contoh: Dana darurat"></label><label>Target nominal<input id="goalTarget" type="number" min="1" required placeholder="Isi nominal impianmu"></label><label>Tanggal target (opsional)<input id="goalDate" type="date"></label><button class="primary-button">＋ Simpan target</button></form></div>
+        <div id="goals" class="data-list"><p class="muted">Belum ada target.</p></div>
+        <h3 class="subheading">🐷 Setoran & penarikan tabungan</h3><p class="inline-note">Setoran di sini mengalokasikan sebagian uang yang sudah ada untuk target: saldo rekening fisik tidak berubah, tetapi <b>saldo tersedia</b> berkurang. Rekening dicatat sebagai asal/rujukan setoran; penarikan membebaskan alokasi target walau uang fisik sudah berpindah rekening. Jika uang benar-benar dipindah ke rekening lain, gunakan Transfer.</p><form id="savingMoveForm" class="three form-grid"><label>Target<select id="savingGoal" required></select></label><label>Jenis<select id="savingMoveType"><option value="deposit">Setoran / alokasi</option><option value="withdrawal">Penarikan / bebaskan alokasi</option></select></label><label>Rekening sumber / rujukan<select id="savingSourceAccount" required></select></label><label>Nominal<input id="savingMoveAmount" type="number" min="1" required></label><label>Tanggal<input id="savingMoveDate" type="date" required></label><label>Catatan<input id="savingMoveNote" maxlength="240"></label><button class="primary-button">Catat setoran / penarikan</button></form><div id="savingMoves" class="data-list"></div>
+      </section>
+
+      <section class="panel section-panel" id="budgetPanel"><div class="section-heading"><div><span class="eyebrow">PAKAI UANG DENGAN SENGAJA</span><h2><span class="section-icon green">🎯</span>Anggaran per kategori</h2></div></div><form id="budgetForm" class="three form-grid"><label>Kategori<select id="budgetCategory" required><option value="Makan">Makan</option><option value="Transportasi/bensin">Transportasi/bensin</option><option value="Tagihan rutin">Tagihan rutin</option><option value="Utang/cicilan">Utang/cicilan</option><option value="Belanja pribadi">Belanja pribadi</option><option value="Tabungan">Tabungan</option><option value="Lainnya">Lainnya</option></select></label><label>Batas bulanan<input id="budgetLimit" type="number" min="1" required></label><button class="primary-button">＋ Simpan anggaran</button></form><p class="inline-note">Pengeluaran dengan kategori padanan (misalnya Makan, Makanan, atau Makan &amp; Minum) digabung ke anggaran yang sama. Anggaran otomatis menghitung transaksi posted bulan berjalan.</p><div id="budgets" class="data-list"><p class="muted">Belum ada anggaran.</p></div></section>
+
+      <section class="panel section-panel" id="debtPanel"><div class="section-heading"><div><span class="eyebrow">LANGKAH KECIL MENUJU BEBAS BEBAN</span><h2><span class="section-icon orange">🤝</span>Utang pribadi</h2></div></div><form id="debtForm" class="three form-grid"><label>Nama utang / pihak<input id="debtName" required maxlength="120"></label><label>Total awal<input id="debtPrincipal" type="number" min="1" required></label><label>Jatuh tempo (opsional)<input id="debtDue" type="date"></label><button class="primary-button">＋ Catat utang</button></form><div id="debts" class="data-list"><p class="muted">Belum ada utang tercatat.</p></div><h3 class="subheading">💸 Catat pembayaran utang</h3><p class="inline-note">Pilih nominal cicilan atau gunakan tombol <b>Bayar penuh</b> pada kartu utang. Pembayaran melalui formulir ini membuat catatan pembayaran dan pengeluaran rekening secara terhubung.</p><form id="debtPaymentForm" class="three form-grid"><label>Utang<select id="paymentDebt" required></select></label><label>Bayar dari rekening<select id="paymentAccount" required></select></label><label>Nominal cicilan<input id="paymentAmount" type="number" min="1" required></label><label>Tanggal<input id="paymentDate" type="date" required></label><label>Catatan<input id="paymentNote" maxlength="240"></label><button class="primary-button">Catat cicilan / pelunasan</button></form><div id="debtPayments" class="data-list"></div></section>
+
+      <section class="panel section-panel" id="billsPanel">
+        <div class="section-heading"><div><span class="eyebrow">TETAP TENANG SAAT JATUH TEMPO</span><h2><span class="section-icon yellow">🧾</span>Tagihan rutin</h2></div><span class="soft-label">Sekali bayar atau berulang</span></div>
+        <p class="inline-note">Tagihan listrik, internet, kos, dan biaya tetap bisa dicatat di sini. Pembayaran menurunkan saldo rekening, masuk laporan pengeluaran, dan memperbarui status tagihan dalam satu proses.</p>
+        <h3 class="subheading">＋ Jadwalkan tagihan</h3>
+        <form id="billForm" class="three form-grid"><label>Nama tagihan<input id="billName" required maxlength="120" placeholder="Contoh: Internet / Kos"></label><label>Nominal tagihan<input id="billAmount" type="number" min="1" required></label><label>Kategori anggaran<select id="billCategory" required><option value="Tagihan rutin">Tagihan rutin</option><option value="Transportasi/bensin">Transportasi/bensin</option><option value="Belanja pribadi">Belanja pribadi</option><option value="Lainnya">Lainnya</option></select></label><label>Jatuh tempo berikutnya<input id="billDue" type="date" required></label><label>Pengulangan<select id="billRecurrence"><option value="monthly">Bulanan</option><option value="weekly">Mingguan</option><option value="yearly">Tahunan</option><option value="none">Sekali bayar</option></select></label><button class="primary-button">＋ Simpan tagihan</button></form>
+        <h3 class="subheading">⏰ Daftar & status tagihan</h3><div id="bills" class="data-list"><p class="muted">Belum ada tagihan.</p></div>
+        <h3 class="subheading">💳 Bayar tagihan</h3><form id="billPaymentForm" class="three form-grid"><label>Tagihan<select id="billPaymentBill" required></select></label><label>Bayar dari rekening<select id="billPaymentAccount" required></select></label><label>Nominal pembayaran<input id="billPaymentAmount" type="number" min="1" required></label><label>Tanggal pembayaran<input id="billPaymentDate" type="date" required></label><label>Catatan<input id="billPaymentNote" maxlength="240" placeholder="Opsional"></label><button class="primary-button">Catat pembayaran tagihan</button></form>
+        <h3 class="subheading">📚 Riwayat pembayaran tagihan</h3><div id="billPayments" class="data-list"><p class="muted">Belum ada pembayaran tagihan.</p></div>
+      </section>
+
+      <section class="panel section-panel" id="backupPanel"><div class="section-heading"><div><span class="eyebrow">DATA KAMU ITU BERHARGA</span><h2><span class="section-icon blue">🛡️</span>Backup & pemulihan</h2></div></div><p class="inline-note">Backup JSON berisi akun, transaksi, target dan pergerakan tabungan, anggaran, utang dan pembayaran, serta tagihan dan riwayat pembayarannya. Simpan file secara privat. Buat backup baru sebelum memulihkan data.</p><div class="backup-actions"><button id="backupBtn" class="primary-button">⬇ Ekspor backup JSON</button><label class="file-picker">Pilih backup JSON<input id="restoreFile" type="file" accept="application/json,.json"></label><button id="restoreBtn" class="secondary">⤴ Pulihkan backup</button></div><p class="muted">Pemulihan menggabungkan data berdasarkan ID (upsert), bukan menghapus data yang ada. Tetap periksa hasil pemulihan sebelum melanjutkan pencatatan.</p><p id="backupMsg" class="status-message"></p></section>
+
+      <section class="panel section-panel" id="recentPanel"><div class="section-heading"><div><span class="eyebrow">JEJAK LANGKAHMU</span><h2><span class="section-icon pink">🧾</span>Transaksi terbaru</h2></div><button id="refresh" class="secondary">↻ Muat ulang</button></div><div id="transactions" class="data-list"></div></section>
+      <section class="panel insight-panel" id="insightsPanel"><div class="insight-mascot" aria-hidden="true">🤖</div><div><span class="eyebrow">CHECK-IN KEUANGAN</span><h2>Catatan kecil, progres besar ✨</h2><p id="insights">Catat transaksi dulu untuk mendapatkan ringkasan berbasis data nyata.</p><p id="goalMotivation" class="motivation-text">Satu tujuan kecil bisa menjadi awal perubahan besar. Pilih inspirasi dan buat target pertamamu.</p></div></section>
+      <footer class="app-footer">MR ALL IN Personal · Ruang keuangan pribadimu · MVP terpisah dari Business V2</footer>
+    </div>
+    <nav class="mobile-dock" aria-label="Navigasi ringkas"><a href="#overview" class="dock-active"><span>🏠</span><small>Beranda</small></a><a href="#transactionsPanel"><span>🧾</span><small>Transaksi</small></a><a href="#analysisPanel"><span>📊</span><small>Analisis</small></a><a href="#savingsPanel"><span>🐷</span><small>Target</small></a><a href="#backupPanel"><span>🛡️</span><small>Data</small></a></nav>
+  </div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>
