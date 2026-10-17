@@ -316,10 +316,15 @@
     const accountMap = new Map(accounts.map(account => [account.id, account]));
     $('transactions').innerHTML = tx.slice(0, 80).map(item => {
       const type = item.transaction_type;
-      const label = type === 'transfer' ? `Transfer: ${accountMap.get(item.account_id)?.name || 'Akun'} → ${accountMap.get(item.transfer_to_account_id)?.name || 'Akun tujuan'}` : canonicalCategory(item.category);
+      const isBusinessWD = type === 'income' && (item.source === 'business_transfer' || item.source_transfer_id);
+      const label = type === 'transfer' ? `Transfer: ${accountMap.get(item.account_id)?.name || 'Akun'} → ${accountMap.get(item.transfer_to_account_id)?.name || 'Akun tujuan'}` : (isBusinessWD ? 'WD / Gaji Pemilik dari MR ALL IN Business' : canonicalCategory(item.category));
       const sign = type === 'income' ? '+' : type === 'expense' ? '−' : '↔';
       const css = type === 'income' ? 'plus' : type === 'expense' ? 'minus' : 'transfer';
-      return `<div class="row"><div><b>${esc(label)}</b><small><br>${esc(item.transaction_date)} · ${esc(accountMap.get(item.account_id)?.name || 'Akun')}${item.note ? ' · ' + esc(item.note) : ''}</small></div><b class="${css}">${sign} ${rp(item.amount)}</b></div>`;
+      const detailParts = [item.transaction_date, accountMap.get(item.account_id)?.name || 'Akun'];
+      if (isBusinessWD) detailParts.push('Pemasukan hasil penarikan pemilik dari kas bisnis');
+      if (item.note) detailParts.push(item.note);
+      if (isBusinessWD && item.source_transfer_id) detailParts.push('ID WD: ' + String(item.source_transfer_id).slice(0, 8).toUpperCase());
+      return `<div class="row"><div><b>${esc(label)}</b><small><br>${detailParts.map(esc).join(' · ')}</small></div><b class="${css}">${sign} ${rp(item.amount)}</b></div>`;
     }).join('') || '<p class="muted">Belum ada transaksi.</p>';
 
     const goalSavedMap = new Map(goals.map(goal => [goal.id, goalSaved(goal)]));
