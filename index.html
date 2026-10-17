@@ -101,7 +101,7 @@
       <section class="panel section-panel" id="transactionsPanel">
         <div class="section-heading"><div><span class="eyebrow">CATAT DENGAN JELAS</span><h2><span class="section-icon pink">🧾</span>Catat transaksi</h2></div><span class="soft-label">Data aktual, bukan tebakan</span></div>
         <form id="tf" class="three form-grid"><label>Tanggal<input id="date" type="date" required></label><label>Jenis<select id="type"><option value="expense">Pengeluaran</option><option value="income">Pemasukan</option></select></label><label>Akun<select id="account" required></select></label><label>Kategori<select id="category"><option>Makan</option><option>Transportasi/bensin</option><option>Tagihan rutin</option><option>Utang/cicilan</option><option>Belanja pribadi</option><option>Gaji/WD dari bisnis</option><option>Tabungan</option><option>Lainnya</option></select></label><label>Nominal<input id="amount" type="number" min="1" required></label><label>Catatan<input id="note" maxlength="240" placeholder="Opsional"></label><button class="primary-button">Simpan transaksi <span>→</span></button></form>
-        <p class="inline-note">💡 WD dari Business hanya dihitung sebagai pemasukan pribadi kalau uangnya benar-benar sudah diterima. Integrasi otomatis Business belum aktif.</p>
+        <p class="inline-note">💡 WD dari MR ALL IN Business dicatat sebagai pemasukan “Gaji/WD dari bisnis” setelah koneksi Business → Personal disiapkan. Transaksi yang masuk dari Business memiliki ID unik agar percobaan ulang tidak menggandakan pemasukan.</p>
       </section>
 
       <section class="panel section-panel" id="transferPanel">
