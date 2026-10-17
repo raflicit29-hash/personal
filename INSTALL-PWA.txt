@@ -1,0 +1,26 @@
+MR ALL IN PERSONAL — PWA INSTALL UPDATE
+
+This is a frontend update only. Do not run any SQL/migration in this ZIP.
+It adds installable PWA metadata, service worker app-shell caching, install button, and app icons.
+
+DEPLOY TO THE EXISTING GitHub repo `personal`:
+1. Create a commit/backup first.
+2. Extract this ZIP on your computer.
+3. Upload/replace the files while preserving this exact folder layout at repo root:
+   - index.html
+   - manifest.webmanifest
+   - sw.js
+   - assets/css/style.css
+   - assets/js/app.js
+   - assets/js/pwa.js
+   - all images inside assets/img/
+4. Commit changes.
+5. Wait for GitHub Pages to publish, then open https://raflicit29-hash.github.io/personal/ in Chrome.
+6. Click the `📲 Instal` button at the top. If Chrome does not show a prompt, use its ⋮ menu and choose Install app / Install page as app / Add to Home screen (wording depends on device/browser).
+
+Android: use Chrome. iPhone/iPad: use Safari > Share > Add to Home Screen.
+Desktop: Chrome > ⋮ > Install page as app (if offered).
+
+The PWA is not an APK. It installs a standalone app shortcut that keeps using the website deployment. Online access is still required for Supabase login, synchronization, and transactions. The service worker does not cache Supabase data/auth responses.
+
+No live testing against the user's production Supabase project has been done from this package build. Test login, account loading, and one small test flow after deploying. Business V2 is not modified.
