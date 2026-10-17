@@ -1,7 +1,7 @@
 /* MR ALL IN Personal PWA shell cache.
  * Never cache Supabase auth/rest responses or any response containing personal finance data.
  */
-const CACHE_NAME = 'mrall-personal-shell-v1';
+const CACHE_NAME = 'mrall-personal-shell-v2';
 const APP_SHELL = [
   './',
   './index.html',
