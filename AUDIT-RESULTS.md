@@ -23,3 +23,11 @@
 ## Not yet verified against the user's live Supabase
 
 No credentials or direct connection to the user's live Supabase project were used. The mocked client integration test is deterministic and synthetic, not a live database/browser test, and PostgreSQL migration 005 was not parsed/executed by a PostgreSQL server in this environment. The SQL migration must be run against the target project after backup, then each flow must be tested using a low-value test record. Do not label this package production-final until the live checks and security audit pass.
+
+## Follow-up validation — 18 October 2026
+
+- User-confirmed smoke tests: WD from Business appears in Personal with clear detail; Business → Store stock synchronization has been tested and works.
+- These are user-reported live checks, not independently repeated by this audit.
+- Repository consistency check: the migration directory currently exposes only `001_personal_mvp.sql`, while this document references `005_integrated_finance.sql` and states that migrations 001–004 must already exist. The missing migration files make a fresh/reproducible setup incomplete. This does not by itself prove the already-running Supabase database is missing those objects.
+- Next release gate: inventory the live database tables, functions, grants and RLS policies; reconcile the missing migration history; then test export/restore using a disposable test account or backup copy before relying on recovery.
+- Do not run a guessed replacement migration on the live finance database. No database migration was applied as part of this follow-up.
