@@ -102,7 +102,7 @@
     } catch (error) { msg(`Login gagal: ${error.message}`, true); }
   }
   async function logout() {
-    try { if (sb) await sb.auth.signOut(); } catch (error) { console.error(error); }
+    try { if (sb) await sb.auth.signOut({ scope: 'local' }); } catch (error) { console.error(error); }
     user = null;
     accounts = []; tx = []; goals = []; budgets = []; debts = []; savingMoves = []; debtPayments = []; bills = []; billPayments = [];
     $('app').classList.add('hidden');
@@ -129,8 +129,8 @@
     return allRows;
   }
   async function loadData() {
-    if (!sb || !user) { msg('Login terlebih dahulu.', true); return; }
-    if (dataLoadInProgress) return;
+    if (!sb || !user) { msg('Login terlebih dahulu.', true); return false; }
+    if (dataLoadInProgress) { msg('Data sedang dimuat. Tunggu sebentar.', true); return false; }
     dataLoadInProgress = true;
     try {
       const loaders = [
@@ -161,9 +161,12 @@
         msg(`Sebagian data berhasil dimuat, tetapi ${loadErrors.length} modul gagal: ${details}. Data yang gagal dibaca tidak dihapus.`, true);
       } else {
         msg(`Data keuangan berhasil dimuat (${tx.length} transaksi terverifikasi dalam daftar).`);
+        return true;
       }
+      return false;
     } catch (error) {
-      msg(`Gagal memuat data: ${error.message}. Periksa koneksi, izin RLS, dan migration 005.`, true);
+      msg(`Gagal memuat data: ${error.message}. Periksa koneksi, izin RLS, dan migration yang sesuai.`, true);
+      return false;
     } finally {
       dataLoadInProgress = false;
     }
@@ -661,6 +664,7 @@
   }
   function backup() {
     if (!user) return msg('Login terlebih dahulu.', true);
+    if (loadErrors.length) return msg('Backup diblokir karena masih ada modul yang gagal dimuat. Muat ulang dan pastikan semua data berhasil dibaca sebelum membuat backup agar file tidak kehilangan data.', true);
     const data = {
       format: 'MR_ALL_IN_PERSONAL_BACKUP', version: 3, exportedAt: new Date().toISOString(), userId: user.id,
       accounts, transactions: tx, savingsGoals: goals, budgets, debts, savingsMovements: savingMoves,
@@ -671,6 +675,7 @@
   }
   async function restoreBackup() {
     if (!user) return msg('Login terlebih dahulu.', true);
+    if (loadErrors.length) return msg('Pemulihan diblokir karena data aplikasi belum termuat lengkap. Perbaiki pemuatan semua modul terlebih dahulu.', true);
     const file = $('restoreFile').files?.[0];
     if (!file) return msg('Pilih file backup JSON terlebih dahulu.', true);
     if (!confirm('Pulihkan dengan menggabungkan data berdasarkan ID? Data yang sudah ada tidak dihapus. Buat backup baru terlebih dahulu.')) return;
