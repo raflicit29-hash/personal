@@ -43,6 +43,14 @@
   const categoryKey = value => CATEGORY_ALIAS_TO_GROUP.get(normalizeText(value))?.key || normalizeText(value);
   const addUp = values => values.reduce((sum, value) => sum + (Number(value) || 0), 0);
 
+  let feedbackTimer = null;
+  function closeFeedback() {
+    const overlay = $('feedbackOverlay');
+    if (!overlay) return;
+    overlay.classList.add('hidden');
+    if (feedbackTimer) window.clearTimeout(feedbackTimer);
+    feedbackTimer = null;
+  }
   function msg(message, error = false) {
     for (const id of ['msg', 'appStatus']) {
       const element = $(id);
@@ -52,6 +60,17 @@
         element.classList.remove('hidden');
       }
     }
+    const overlay = $('feedbackOverlay');
+    const dialog = $('feedbackDialog');
+    if (!overlay || !dialog) return;
+    if (feedbackTimer) window.clearTimeout(feedbackTimer);
+    overlay.classList.remove('hidden');
+    dialog.classList.toggle('is-error', error);
+    $('feedbackIcon').textContent = error ? '!' : '✓';
+    $('feedbackTitle').textContent = error ? 'Belum berhasil' : 'Berhasil';
+    $('feedbackMessage').textContent = message;
+    $('feedbackClose')?.focus({ preventScroll: true });
+    feedbackTimer = window.setTimeout(closeFeedback, error ? 10000 : 4500);
   }
   function configFromForm() {
     return { url: $('url').value.trim().replace(/\/+$/, ''), key: $('key').value.trim() };
@@ -743,6 +762,10 @@
     $('billPaymentForm').addEventListener('submit', guardedSubmit(addBillPayment));
     $('backupBtn').addEventListener('click', backup);
     $('restoreBtn').addEventListener('click', restoreBackup);
+    $('feedbackClose')?.addEventListener('click', closeFeedback);
+    $('feedbackOk')?.addEventListener('click', closeFeedback);
+    $('feedbackOverlay')?.addEventListener('click', event => { if (event.target === $('feedbackOverlay')) closeFeedback(); });
+    document.addEventListener('keydown', event => { if (event.key === 'Escape') closeFeedback(); });
     $('savingMoveDate').value = today; $('paymentDate').value = today; $('billDue').value = today; $('billPaymentDate').value = today;
     const hour = new Date().getHours();
     $('greeting').textContent = hour < 11 ? 'Selamat pagi,' : hour < 15 ? 'Selamat siang,' : hour < 18 ? 'Selamat sore,' : 'Selamat malam,';
