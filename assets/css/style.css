@@ -123,3 +123,44 @@ button:disabled{opacity:.58;cursor:wait;transform:none!important;filter:saturate
 .install-app-button[hidden],.install-app-button.hidden{display:none!important}
 @media(max-width:760px){.install-app-button{padding:7px 9px;font-size:10px;min-height:34px}.topbar-right{gap:6px}.state-pill{max-width:100px}}
 @media(max-width:390px){.install-app-button{padding:7px 8px;font-size:9px}.state-pill{max-width:70px}}
+
+
+/* Mobile slide-out navigation: keeps the existing navigation links and desktop layout intact. */
+.mobile-menu-toggle,.sidebar-backdrop{display:none}
+@media(max-width:760px){
+  body{padding-bottom:0}
+  .mobile-menu-toggle{
+    position:fixed;left:12px;top:calc(72px + env(safe-area-inset-top));z-index:101;
+    display:flex;align-items:center;gap:7px;padding:9px 12px;border:1px solid #4965a5;
+    border-radius:13px;background:linear-gradient(120deg,#123b70f5,#30245ff5);
+    color:#eaf4ff;box-shadow:0 8px 24px #0007;backdrop-filter:blur(16px);
+    font-size:17px;font-weight:800
+  }
+  .mobile-menu-toggle small{font-size:10px;letter-spacing:.04em}
+  .sidebar-backdrop{
+    display:block;position:fixed;inset:0;z-index:99;background:#020611a8;
+    opacity:0;visibility:hidden;transition:opacity .24s ease,visibility .24s ease;
+    backdrop-filter:blur(3px)
+  }
+  .sidebar{
+    display:block;position:fixed;z-index:100;left:0;top:0;bottom:0;
+    width:min(82vw,310px);height:100dvh;max-height:100dvh;overflow-y:auto;
+    padding:calc(20px + env(safe-area-inset-top)) 14px calc(18px + env(safe-area-inset-bottom));
+    border-radius:0 24px 24px 0;border:1px solid #344a78;border-left:0;
+    background:linear-gradient(160deg,#0b1732f7,#080f23f8);
+    box-shadow:18px 0 48px #0009;transform:translateX(-105%);
+    transition:transform .28s cubic-bezier(.2,.8,.2,1);will-change:transform
+  }
+  .sidebar.is-open{transform:translateX(0)}
+  .sidebar-backdrop.is-visible{opacity:1;visibility:visible}
+  .sidebar-title,.sidebar-motivation{display:flex}
+  .sidebar-motivation{display:grid}
+  .side-nav{display:grid;gap:6px;overflow:visible;padding:0}
+  .nav-link{flex:initial;white-space:normal;padding:11px}
+  .mobile-dock{display:none!important}
+  body.sidebar-open{overflow:hidden;touch-action:pan-y}
+  .welcome-strip{padding-top:52px}
+}
+@media(prefers-reduced-motion:reduce){
+  .sidebar,.sidebar-backdrop{transition:none!important}
+}

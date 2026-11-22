@@ -47,7 +47,9 @@
   </section>
 
   <div id="app" class="app-layout hidden">
-    <aside class="sidebar" aria-label="Navigasi utama">
+    <button id="mobileMenuToggle" class="mobile-menu-toggle" type="button" aria-label="Buka menu navigasi" aria-controls="personalSidebar" aria-expanded="false"><span aria-hidden="true">☰</span><small>Menu</small></button>
+    <div id="sidebarBackdrop" class="sidebar-backdrop" aria-hidden="true"></div>
+    <aside id="personalSidebar" class="sidebar" aria-label="Navigasi utama">
       <div class="sidebar-title"><span>🌌</span><div><b>FINANCE SPACE</b><small>perjalananmu dimulai</small></div></div>
       <nav class="side-nav">
         <a href="#overview" class="nav-link active"><span>🏠</span>Beranda</a>
@@ -153,7 +155,7 @@
       <section class="panel insight-panel" id="insightsPanel"><div class="insight-mascot" aria-hidden="true">🤖</div><div><span class="eyebrow">CHECK-IN KEUANGAN</span><h2>Catatan kecil, progres besar ✨</h2><p id="insights">Catat transaksi dulu untuk mendapatkan ringkasan berbasis data nyata.</p><p id="goalMotivation" class="motivation-text">Satu tujuan kecil bisa menjadi awal perubahan besar. Pilih inspirasi dan buat target pertamamu.</p></div></section>
       <footer class="app-footer">MR ALL IN Personal · Ruang keuangan pribadimu · MVP terpisah dari Business V2</footer>
     </div>
-    <nav class="mobile-dock" aria-label="Navigasi ringkas"><a href="#overview" class="dock-active"><span>🏠</span><small>Beranda</small></a><a href="#transactionsPanel"><span>🧾</span><small>Transaksi</small></a><a href="#analysisPanel"><span>📊</span><small>Analisis</small></a><a href="#savingsPanel"><span>🐷</span><small>Target</small></a><a href="#backupPanel"><span>🛡️</span><small>Data</small></a></nav>
+    
   </div>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
