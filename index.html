@@ -68,6 +68,15 @@
 
     <div class="app-main">
       <div id="appStatus" class="app-status hidden" role="status" aria-live="polite"></div>
+      <div id="feedbackOverlay" class="feedback-overlay hidden" role="presentation">
+        <section id="feedbackDialog" class="feedback-dialog" role="alertdialog" aria-modal="true" aria-labelledby="feedbackTitle" aria-describedby="feedbackMessage">
+          <button id="feedbackClose" class="feedback-close" type="button" aria-label="Tutup notifikasi">×</button>
+          <div id="feedbackIcon" class="feedback-icon" aria-hidden="true">✓</div>
+          <h2 id="feedbackTitle">Berhasil</h2>
+          <p id="feedbackMessage"></p>
+          <button id="feedbackOk" class="primary-button feedback-ok" type="button">Oke, mengerti</button>
+        </section>
+      </div>
       <section class="welcome-strip" id="overview">
         <div><span class="eyebrow">✦ FINANCIAL FREEDOM JOURNEY</span><h2><span id="greeting">Selamat datang kembali,</span> <span class="gradient-text">Pejuang Finansial!</span></h2><p>Siap bikin keputusan yang lebih baik hari ini?</p></div>
         <a class="pill-link" href="#transactionsPanel">＋ Catat transaksi</a>
