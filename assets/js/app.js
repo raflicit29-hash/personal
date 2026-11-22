@@ -784,10 +784,51 @@
       const button = event.target.closest('[data-bill-action]');
       if (button) prefillBillPayment(button.dataset.billId, button.dataset.billAction);
     });
-    document.querySelectorAll('.side-nav a,.mobile-dock a').forEach(link => link.addEventListener('click', () => {
+    document.querySelectorAll('.side-nav a').forEach(link => link.addEventListener('click', () => {
       document.querySelectorAll('.side-nav a').forEach(item => item.classList.toggle('active', item.getAttribute('href') === link.getAttribute('href')));
-      document.querySelectorAll('.mobile-dock a').forEach(item => item.classList.toggle('dock-active', item.getAttribute('href') === link.getAttribute('href')));
+      closeMobileSidebar();
     }));
+
+    const menuToggle = $('mobileMenuToggle'), sidebar = $('personalSidebar'), sidebarBackdrop = $('sidebarBackdrop');
+    function openMobileSidebar() {
+      if (!sidebar || !menuToggle || !window.matchMedia('(max-width: 760px)').matches) return;
+      sidebar.classList.add('is-open'); sidebarBackdrop?.classList.add('is-visible');
+      document.body.classList.add('sidebar-open');
+      menuToggle.setAttribute('aria-expanded', 'true');
+      menuToggle.setAttribute('aria-label', 'Tutup menu navigasi');
+      menuToggle.querySelector('span').textContent = '✕';
+    }
+    function closeMobileSidebar() {
+      if (!sidebar || !menuToggle) return;
+      sidebar.classList.remove('is-open'); sidebarBackdrop?.classList.remove('is-visible');
+      document.body.classList.remove('sidebar-open');
+      menuToggle.setAttribute('aria-expanded', 'false');
+      menuToggle.setAttribute('aria-label', 'Buka menu navigasi');
+      menuToggle.querySelector('span').textContent = '☰';
+    }
+    menuToggle?.addEventListener('click', () => menuToggle.getAttribute('aria-expanded') === 'true' ? closeMobileSidebar() : openMobileSidebar());
+    sidebarBackdrop?.addEventListener('click', closeMobileSidebar);
+    document.addEventListener('keydown', event => { if (event.key === 'Escape') closeMobileSidebar(); });
+    let edgeTouchStart = null, drawerTouchStart = null;
+    document.addEventListener('touchstart', event => {
+      if (!window.matchMedia('(max-width: 760px)').matches || !event.touches.length) return;
+      const x = event.touches[0].clientX;
+      if (menuToggle?.getAttribute('aria-expanded') !== 'true' && x <= 24) edgeTouchStart = x;
+    }, { passive: true });
+    document.addEventListener('touchend', event => {
+      if (edgeTouchStart !== null && event.changedTouches.length) {
+        if (event.changedTouches[0].clientX - edgeTouchStart > 65) openMobileSidebar();
+      }
+      edgeTouchStart = null;
+    }, { passive: true });
+    sidebar?.addEventListener('touchstart', event => {
+      if (event.touches.length) drawerTouchStart = event.touches[0].clientX;
+    }, { passive: true });
+    sidebar?.addEventListener('touchend', event => {
+      if (drawerTouchStart !== null && event.changedTouches.length && drawerTouchStart - event.changedTouches[0].clientX > 65) closeMobileSidebar();
+      drawerTouchStart = null;
+    }, { passive: true });
+    window.addEventListener('resize', () => { if (window.innerWidth > 760) closeMobileSidebar(); });
 
     loadConfig();
     if (sb) {
