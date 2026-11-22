@@ -6,6 +6,7 @@
   let sb = null, user = null;
   let accounts = [], tx = [], goals = [], budgets = [], debts = [];
   let savingMoves = [], debtPayments = [], bills = [], billPayments = [];
+  let loadErrors = [];
 
   const rp = value => new Intl.NumberFormat('id-ID', {
     style: 'currency', currency: 'IDR', maximumFractionDigits: 0
@@ -127,20 +128,35 @@
   async function loadData() {
     if (!sb || !user) { msg('Login terlebih dahulu.', true); return; }
     try {
-      const results = await Promise.all([
-        fetchAllRows('personal_accounts', q => q.order('created_at').order('id')),
-        fetchAllRows('personal_transactions', q => q.order('transaction_date', { ascending: false }).order('created_at', { ascending: false }).order('id', { ascending: false })),
-        fetchAllRows('personal_savings_goals', q => q.order('created_at', { ascending: false }).order('id', { ascending: false })),
-        fetchAllRows('personal_budgets', q => q.order('category').order('id')),
-        fetchAllRows('personal_debts', q => q.order('created_at', { ascending: false }).order('id', { ascending: false })),
-        fetchAllRows('personal_savings_movements', q => q.order('movement_date', { ascending: false }).order('created_at', { ascending: false }).order('id', { ascending: false })),
-        fetchAllRows('personal_debt_payments', q => q.order('payment_date', { ascending: false }).order('created_at', { ascending: false }).order('id', { ascending: false })),
-        fetchAllRows('personal_bills', q => q.order('due_date').order('id')),
-        fetchAllRows('personal_bill_payments', q => q.order('payment_date', { ascending: false }).order('created_at', { ascending: false }).order('id', { ascending: false }))
-      ]);
-      [accounts, tx, goals, budgets, debts, savingMoves, debtPayments, bills, billPayments] = results;
+      const loaders = [
+        ['personal_accounts', () => fetchAllRows('personal_accounts', q => q.order('created_at').order('id'))],
+        ['personal_transactions', () => fetchAllRows('personal_transactions', q => q.order('transaction_date', { ascending: false }).order('created_at', { ascending: false }).order('id', { ascending: false }))],
+        ['personal_savings_goals', () => fetchAllRows('personal_savings_goals', q => q.order('created_at', { ascending: false }).order('id', { ascending: false }))],
+        ['personal_budgets', () => fetchAllRows('personal_budgets', q => q.order('category').order('id'))],
+        ['personal_debts', () => fetchAllRows('personal_debts', q => q.order('created_at', { ascending: false }).order('id', { ascending: false }))],
+        ['personal_savings_movements', () => fetchAllRows('personal_savings_movements', q => q.order('movement_date', { ascending: false }).order('created_at', { ascending: false }).order('id', { ascending: false }))],
+        ['personal_debt_payments', () => fetchAllRows('personal_debt_payments', q => q.order('payment_date', { ascending: false }).order('created_at', { ascending: false }).order('id', { ascending: false }))],
+        ['personal_bills', () => fetchAllRows('personal_bills', q => q.order('due_date').order('id'))],
+        ['personal_bill_payments', () => fetchAllRows('personal_bill_payments', q => q.order('payment_date', { ascending: false }).order('created_at', { ascending: false }).order('id', { ascending: false }))]
+      ];
+      const results = await Promise.allSettled(loaders.map(([, load]) => load()));
+      const currentData = [accounts, tx, goals, budgets, debts, savingMoves, debtPayments, bills, billPayments];
+      loadErrors = [];
+      results.forEach((result, index) => {
+        if (result.status === 'fulfilled') currentData[index] = result.value;
+        else loadErrors.push({
+          table: loaders[index][0],
+          message: result.reason?.message || String(result.reason || 'Kesalahan tidak diketahui')
+        });
+      });
+      [accounts, tx, goals, budgets, debts, savingMoves, debtPayments, bills, billPayments] = currentData;
       render();
-      msg(`Data keuangan berhasil dimuat (${tx.length} transaksi terverifikasi dalam daftar).`);
+      if (loadErrors.length) {
+        const details = loadErrors.map(item => item.message).join(' | ');
+        msg(`Sebagian data berhasil dimuat, tetapi ${loadErrors.length} modul gagal: ${details}. Data yang gagal dibaca tidak dihapus.`, true);
+      } else {
+        msg(`Data keuangan berhasil dimuat (${tx.length} transaksi terverifikasi dalam daftar).`);
+      }
     } catch (error) {
       msg(`Gagal memuat data: ${error.message}. Periksa koneksi, izin RLS, dan migration 005.`, true);
     }
@@ -368,15 +384,18 @@
     budgetSpent.set(savingsKey, Math.max(0, (budgetSpent.get(savingsKey) || 0) + netSavingsAllocation));
     const activeBudgets = budgetGroups();
     const budgetAlerts = [];
-    $('budgets').innerHTML = activeBudgets.map(budget => {
-      const used = Math.max(0, budgetSpent.get(categoryKey(budget.displayCategory)) || 0);
-      const limit = Number(budget.monthly_limit) || 0;
-      const pct = limit > 0 ? Math.round(used / limit * 100) : 0;
-      const remaining = limit - used;
-      if (remaining < 0) budgetAlerts.push(`${budget.displayCategory} melewati batas ${rp(Math.abs(remaining))}`);
-      const displayPct = Math.min(100, Math.max(0, pct));
-      return `<div class="budget-record"><div class="budget-top"><b>${esc(budget.displayCategory)}</b><strong class="${remaining < 0 ? 'minus' : ''}">${pct}%</strong></div><small>Terpakai ${rp(used)} dari ${rp(limit)} · ${remaining >= 0 ? 'sisa ' + rp(remaining) : 'lebih ' + rp(Math.abs(remaining))}</small><div class="progress"><span class="${remaining < 0 ? 'over' : ''}" style="width:${displayPct}%"></span></div></div>`;
-    }).join('') || '<p class="muted">Belum ada anggaran. Buat anggaran, misalnya Makan Rp1.500.000/bulan. Pengeluaran yang cocok akan dihitung otomatis.</p>';
+    const budgetLoadError = loadErrors.find(item => item.table === 'personal_budgets');
+    $('budgets').innerHTML = budgetLoadError
+      ? `<p class="error">Data anggaran belum bisa dibaca dari Supabase: ${esc(budgetLoadError.message)}. Anggaran lama tidak dihapus. Periksa tabel, izin RLS, dan migration yang memang sudah diterapkan pada project ini.</p>`
+      : activeBudgets.map(budget => {
+        const used = Math.max(0, budgetSpent.get(categoryKey(budget.displayCategory)) || 0);
+        const limit = Number(budget.monthly_limit) || 0;
+        const pct = limit > 0 ? Math.round(used / limit * 100) : 0;
+        const remaining = limit - used;
+        if (remaining < 0) budgetAlerts.push(`${budget.displayCategory} melewati batas ${rp(Math.abs(remaining))}`);
+        const displayPct = Math.min(100, Math.max(0, pct));
+        return `<div class="budget-record"><div class="budget-top"><b>${esc(budget.displayCategory)}</b><strong class="${remaining < 0 ? 'minus' : ''}">${pct}%</strong></div><small>Terpakai ${rp(used)} dari ${rp(limit)} · ${remaining >= 0 ? 'sisa ' + rp(remaining) : 'lebih ' + rp(Math.abs(remaining))}</small><div class="progress"><span class="${remaining < 0 ? 'over' : ''}" style="width:${displayPct}%"></span></div></div>`;
+      }).join('') || '<p class="muted">Belum ada anggaran. Buat anggaran, misalnya Makan Rp1.500.000/bulan. Pengeluaran yang cocok akan dihitung otomatis.</p>'
 
     const paidByDebt = new Map();
     debtPayments.forEach(payment => paidByDebt.set(payment.debt_id, (paidByDebt.get(payment.debt_id) || 0) + Number(payment.amount || 0)));
