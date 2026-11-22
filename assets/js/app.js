@@ -807,10 +807,23 @@
       const button = event.target.closest('[data-bill-action]');
       if (button) prefillBillPayment(button.dataset.billId, button.dataset.billAction);
     });
-    document.querySelectorAll('.side-nav a').forEach(link => link.addEventListener('click', () => {
-      document.querySelectorAll('.side-nav a').forEach(item => item.classList.toggle('active', item.getAttribute('href') === link.getAttribute('href')));
+    const sideNav = document.querySelector('.side-nav');
+    sideNav?.addEventListener('click', event => {
+      const link = event.target.closest('a[href^="#"]');
+      if (!link || !sideNav.contains(link)) return;
+      const targetId = decodeURIComponent(link.getAttribute('href').slice(1));
+      const target = document.getElementById(targetId);
+      if (!target) return;
+      event.preventDefault();
+      document.querySelectorAll('.side-nav a').forEach(item => {
+        item.classList.toggle('active', item === link);
+      });
       closeMobileSidebar();
-    }));
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (window.location.hash !== link.getAttribute('href')) {
+        history.replaceState(null, '', link.getAttribute('href'));
+      }
+    });
 
     const menuToggle = $('mobileMenuToggle'), sidebar = $('personalSidebar'), sidebarBackdrop = $('sidebarBackdrop');
     function openMobileSidebar() {
