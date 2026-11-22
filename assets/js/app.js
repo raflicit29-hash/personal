@@ -7,6 +7,7 @@
   let accounts = [], tx = [], goals = [], budgets = [], debts = [];
   let savingMoves = [], debtPayments = [], bills = [], billPayments = [];
   let loadErrors = [];
+  let dataLoadInProgress = false;
 
   const rp = value => new Intl.NumberFormat('id-ID', {
     style: 'currency', currency: 'IDR', maximumFractionDigits: 0
@@ -81,6 +82,7 @@
   function showApp() {
     $('state').textContent = 'Login aktif';
     $('logout').classList.remove('hidden');
+    $('logoutTop')?.classList.remove('hidden');
     $('loginPanel').classList.add('hidden');
     document.querySelector('.intro-hero')?.classList.add('hidden');
     $('app').classList.remove('hidden');
@@ -107,6 +109,7 @@
     $('loginPanel').classList.remove('hidden');
     document.querySelector('.intro-hero')?.classList.remove('hidden');
     $('logout').classList.add('hidden');
+    $('logoutTop')?.classList.add('hidden');
     $('state').textContent = 'Belum login';
     window.scrollTo({ top: 0, behavior: 'smooth' });
     msg('Sudah keluar.');
@@ -127,6 +130,8 @@
   }
   async function loadData() {
     if (!sb || !user) { msg('Login terlebih dahulu.', true); return; }
+    if (dataLoadInProgress) return;
+    dataLoadInProgress = true;
     try {
       const loaders = [
         ['personal_accounts', () => fetchAllRows('personal_accounts', q => q.order('created_at').order('id'))],
@@ -159,6 +164,8 @@
       }
     } catch (error) {
       msg(`Gagal memuat data: ${error.message}. Periksa koneksi, izin RLS, dan migration 005.`, true);
+    } finally {
+      dataLoadInProgress = false;
     }
   }
 
@@ -713,6 +720,7 @@
     $('save').addEventListener('click', saveConfig);
     $('login').addEventListener('click', login);
     $('logout').addEventListener('click', logout);
+    $('logoutTop')?.addEventListener('click', logout);
     $('af').addEventListener('submit', guardedSubmit(addAccount));
     $('tf').addEventListener('submit', guardedSubmit(addTransaction));
     $('transferForm').addEventListener('submit', guardedSubmit(addTransfer));
