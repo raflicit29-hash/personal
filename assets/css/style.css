@@ -164,3 +164,30 @@ button:disabled{opacity:.58;cursor:wait;transform:none!important;filter:saturate
 @media(prefers-reduced-motion:reduce){
   .sidebar,.sidebar-backdrop{transition:none!important}
 }
+
+
+/* Center-screen operation feedback: visible without scrolling to the page header. */
+.feedback-overlay{position:fixed;inset:0;z-index:300;display:grid;place-items:center;padding:20px;background:#020611b8;backdrop-filter:blur(7px);opacity:1;visibility:visible;transition:opacity .18s ease,visibility .18s ease}
+.feedback-overlay.hidden{display:none}
+.feedback-dialog{position:relative;width:min(100%,390px);padding:28px 24px 22px;text-align:center;border:1px solid #42628f;border-radius:24px;background:linear-gradient(155deg,#14284a,#10152f 72%);box-shadow:0 24px 90px #000b,0 0 38px #347eff25;animation:feedbackPop .2s ease-out}
+.feedback-close{position:absolute;right:12px;top:10px;width:34px;height:34px;border:1px solid #3b5077;border-radius:50%;background:#1b2b4a;color:#dce8ff;font-size:24px;line-height:1}
+.feedback-icon{width:58px;height:58px;display:grid;place-items:center;margin:0 auto 13px;border-radius:50%;border:1px solid #36b99a;background:#103e3c;color:#75f1cb;font-size:32px;font-weight:900;box-shadow:0 0 25px #26d9ac2b}
+.feedback-dialog h2{margin:0 0 8px;color:#f5f8ff;font-size:21px}
+.feedback-dialog p{margin:0;color:#c4d3ef;font-size:13px;line-height:1.65;overflow-wrap:anywhere}
+.feedback-dialog.is-error{border-color:#a34b6d;background:linear-gradient(155deg,#40203b,#17172f 72%)}
+.feedback-dialog.is-error .feedback-icon{border-color:#c75b7c;background:#56263e;color:#ffb0c5;box-shadow:0 0 25px #ff4c822b}
+.feedback-ok{width:100%;margin-top:20px}
+@keyframes feedbackPop{from{opacity:0;transform:translateY(10px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media(max-width:760px){
+  main{padding-top:10px;padding-bottom:24px}
+  .app-main>.panel{padding:14px 12px;margin-bottom:10px}
+  .welcome-strip{gap:8px;padding-bottom:10px}
+  .welcome-strip p{display:none}
+  .main-metrics{margin-bottom:12px}
+  .quick-action-section{margin-bottom:12px}
+  .section-heading{margin-bottom:10px}
+  .panel h2{font-size:17px}
+  .form-grid{gap:9px}
+  .form-grid input,.form-grid select{padding:10px 11px}
+  .feedback-dialog{padding:25px 19px 18px;border-radius:21px}
+}
