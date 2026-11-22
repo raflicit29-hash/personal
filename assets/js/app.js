@@ -827,24 +827,49 @@
 
     const menuToggle = $('mobileMenuToggle'), sidebar = $('personalSidebar'), sidebarBackdrop = $('sidebarBackdrop');
     function openMobileSidebar() {
-      if (!sidebar || !menuToggle || !window.matchMedia('(max-width: 760px)').matches) return;
-      sidebar.classList.add('is-open'); sidebarBackdrop?.classList.add('is-visible');
+      if (!sidebar || !menuToggle) return;
+      sidebar.classList.add('is-open');
+      sidebarBackdrop?.classList.add('is-visible');
       document.body.classList.add('sidebar-open');
       menuToggle.setAttribute('aria-expanded', 'true');
       menuToggle.setAttribute('aria-label', 'Tutup menu navigasi');
-      menuToggle.querySelector('span').textContent = '✕';
+      const icon = menuToggle.querySelector('span');
+      if (icon) icon.textContent = '✕';
     }
     function closeMobileSidebar() {
       if (!sidebar || !menuToggle) return;
-      sidebar.classList.remove('is-open'); sidebarBackdrop?.classList.remove('is-visible');
+      sidebar.classList.remove('is-open');
+      sidebarBackdrop?.classList.remove('is-visible');
       document.body.classList.remove('sidebar-open');
       menuToggle.setAttribute('aria-expanded', 'false');
       menuToggle.setAttribute('aria-label', 'Buka menu navigasi');
-      menuToggle.querySelector('span').textContent = '☰';
+      const icon = menuToggle.querySelector('span');
+      if (icon) icon.textContent = '☰';
     }
-    menuToggle?.addEventListener('click', () => menuToggle.getAttribute('aria-expanded') === 'true' ? closeMobileSidebar() : openMobileSidebar());
+    // Delegate the trigger from document so it still works if another script re-renders nearby UI.
+    document.addEventListener('click', event => {
+      const trigger = event.target.closest('#mobileMenuToggle');
+      if (!trigger) return;
+      event.preventDefault();
+      event.stopPropagation();
+      if (trigger.getAttribute('aria-expanded') === 'true') closeMobileSidebar();
+      else openMobileSidebar();
+    }, true);
     sidebarBackdrop?.addEventListener('click', closeMobileSidebar);
     document.addEventListener('keydown', event => { if (event.key === 'Escape') closeMobileSidebar(); });
+    const sideNav = document.querySelector('.side-nav');
+    sideNav?.addEventListener('click', event => {
+      const link = event.target.closest('a[href^="#"]');
+      if (!link || !sideNav.contains(link)) return;
+      const targetId = decodeURIComponent(link.getAttribute('href').slice(1));
+      const target = document.getElementById(targetId);
+      if (!target) return;
+      event.preventDefault();
+      document.querySelectorAll('.side-nav a').forEach(item => item.classList.toggle('active', item === link));
+      closeMobileSidebar();
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (window.location.hash !== link.getAttribute('href')) history.replaceState(null, '', link.getAttribute('href'));
+    });
     let edgeTouchStart = null, drawerTouchStart = null;
     document.addEventListener('touchstart', event => {
       if (!window.matchMedia('(max-width: 760px)').matches || !event.touches.length) return;
@@ -852,9 +877,7 @@
       if (menuToggle?.getAttribute('aria-expanded') !== 'true' && x <= 24) edgeTouchStart = x;
     }, { passive: true });
     document.addEventListener('touchend', event => {
-      if (edgeTouchStart !== null && event.changedTouches.length) {
-        if (event.changedTouches[0].clientX - edgeTouchStart > 65) openMobileSidebar();
-      }
+      if (edgeTouchStart !== null && event.changedTouches.length && event.changedTouches[0].clientX - edgeTouchStart > 65) openMobileSidebar();
       edgeTouchStart = null;
     }, { passive: true });
     sidebar?.addEventListener('touchstart', event => {
