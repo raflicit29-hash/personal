@@ -395,7 +395,7 @@
         if (remaining < 0) budgetAlerts.push(`${budget.displayCategory} melewati batas ${rp(Math.abs(remaining))}`);
         const displayPct = Math.min(100, Math.max(0, pct));
         return `<div class="budget-record"><div class="budget-top"><b>${esc(budget.displayCategory)}</b><strong class="${remaining < 0 ? 'minus' : ''}">${pct}%</strong></div><small>Terpakai ${rp(used)} dari ${rp(limit)} · ${remaining >= 0 ? 'sisa ' + rp(remaining) : 'lebih ' + rp(Math.abs(remaining))}</small><div class="progress"><span class="${remaining < 0 ? 'over' : ''}" style="width:${displayPct}%"></span></div></div>`;
-      }).join('') || '<p class="muted">Belum ada anggaran. Buat anggaran, misalnya Makan Rp1.500.000/bulan. Pengeluaran yang cocok akan dihitung otomatis.</p>'
+      }).join('') || '<p class="muted">Supabase berhasil merespons, tetapi 0 anggaran aktif terbaca untuk akun yang sedang login. Ini tidak berarti data terhapus: bisa memang belum ada baris, semua anggaran berstatus nonaktif, atau kebijakan RLS menyembunyikan baris. Jangan jalankan SQL reset. Periksa tabel public.personal_budgets, kolom user_id, nilai active, dan policy SELECT untuk auth.uid() = user_id.</p>'
 
     const paidByDebt = new Map();
     debtPayments.forEach(payment => paidByDebt.set(payment.debt_id, (paidByDebt.get(payment.debt_id) || 0) + Number(payment.amount || 0)));
