@@ -102,7 +102,7 @@
     } catch (error) { msg(`Login gagal: ${error.message}`, true); }
   }
   async function logout() {
-    try { if (sb) await sb.auth.signOut(); } catch (error) { console.error(error); }
+    try { if (sb) await sb.auth.signOut({ scope: 'local' }); } catch (error) { console.error(error); }
     user = null;
     accounts = []; tx = []; goals = []; budgets = []; debts = []; savingMoves = []; debtPayments = []; bills = []; billPayments = [];
     $('app').classList.add('hidden');
@@ -129,8 +129,8 @@
     return allRows;
   }
   async function loadData() {
-    if (!sb || !user) { msg('Login terlebih dahulu.', true); return; }
-    if (dataLoadInProgress) return;
+    if (!sb || !user) { msg('Login terlebih dahulu.', true); return false; }
+    if (dataLoadInProgress) { msg('Data sedang dimuat. Tunggu sebentar.', true); return false; }
     dataLoadInProgress = true;
     try {
       const loaders = [
@@ -161,9 +161,12 @@
         msg(`Sebagian data berhasil dimuat, tetapi ${loadErrors.length} modul gagal: ${details}. Data yang gagal dibaca tidak dihapus.`, true);
       } else {
         msg(`Data keuangan berhasil dimuat (${tx.length} transaksi terverifikasi dalam daftar).`);
+        return true;
       }
+      return false;
     } catch (error) {
-      msg(`Gagal memuat data: ${error.message}. Periksa koneksi, izin RLS, dan migration 005.`, true);
+      msg(`Gagal memuat data: ${error.message}. Periksa koneksi, izin RLS, dan migration yang sesuai.`, true);
+      return false;
     } finally {
       dataLoadInProgress = false;
     }
@@ -475,7 +478,7 @@
     try {
       const result = await sb.from('personal_accounts').insert({ user_id: user.id, name, account_type: $('atype').value, opening_balance: Number($('opening').value) || 0, active: true });
       if (result.error) throw result.error;
-      $('af').reset(); $('opening').value = '0'; await loadData(); msg('Akun berhasil ditambahkan.');
+      $('af').reset(); $('opening').value = '0'; if (await loadData()) msg('Akun berhasil ditambahkan.');
     } catch (error) { msg(`Gagal menambah akun: ${error.message}`, true); }
   }
   async function addTransaction(event) {
@@ -493,7 +496,7 @@
       });
       if (result.error) throw result.error;
       const savedAmount = amount; $('amount').value = ''; $('note').value = '';
-      await loadData();
+      if (!(await loadData())) return;
       if (type === 'expense') {
         const matchingBudget = budgetGroups().find(budget => categoryKey(budget.displayCategory) === categoryKey(category));
         if (matchingBudget) {
@@ -518,7 +521,7 @@
         p_note: $('transferNote').value.trim() || null
       });
       if (result.error) throw result.error;
-      $('transferAmount').value = ''; $('transferNote').value = ''; await loadData(); msg('Transfer tersimpan. Saldo asal berkurang, saldo tujuan bertambah; laporan pemasukan/pengeluaran tidak berubah.');
+      $('transferAmount').value = ''; $('transferNote').value = ''; if (await loadData()) msg('Transfer tersimpan. Saldo asal berkurang, saldo tujuan bertambah; laporan pemasukan/pengeluaran tidak berubah.');
     } catch (error) { msg(`Gagal menyimpan transfer. Periksa migration 002 dan saldo akun: ${error.message}`, true); }
   }
   async function addGoal(event) {
@@ -530,7 +533,7 @@
     try {
       const result = await sb.from('personal_savings_goals').insert({ user_id: user.id, name, target_amount: target, target_date: $('goalDate').value || null, saved_amount: 0, status: 'active' });
       if (result.error) throw result.error;
-      $('goalForm').reset(); await loadData(); msg(`Target ${name} berhasil dibuat. Gunakan tombol Setor di kartu target untuk mengalokasikan dana.`);
+      $('goalForm').reset(); if (await loadData()) msg(`Target ${name} berhasil dibuat. Gunakan tombol Setor di kartu target untuk mengalokasikan dana.`);
     } catch (error) { msg(`Gagal menyimpan target: ${error.message}`, true); }
   }
   async function addSavingMovement(event) {
@@ -559,7 +562,7 @@
     try {
       const result = await sb.rpc('record_personal_savings_movement', { p_goal_id: goalId, p_source_account_id: legacySource ? null : sourceAccountId, p_movement_type: type, p_amount: amount, p_movement_date: $('savingMoveDate').value || localDate(new Date()), p_note: $('savingMoveNote').value.trim() || null });
       if (result.error) throw result.error;
-      $('savingMoveAmount').value = ''; $('savingMoveNote').value = ''; await loadData();
+      $('savingMoveAmount').value = ''; $('savingMoveNote').value = ''; if (!(await loadData())) return;
       msg(type === 'deposit' ? `Alokasi ${rp(amount)} masuk ke target. Saldo rekening fisik tidak diubah; saldo tersedia berkurang.` : `Alokasi ${rp(amount)} dibebaskan dari target. Saldo tersedia bertambah; saldo rekening fisik tidak diubah.`);
     } catch (error) { msg(`Gagal mencatat pergerakan tabungan: ${error.message}`, true); }
   }
@@ -578,7 +581,7 @@
         ? await sb.from('personal_budgets').update({ category, monthly_limit: limit, active: true, updated_at: new Date().toISOString() }).eq('id', existing.id).eq('user_id', user.id)
         : await sb.from('personal_budgets').insert({ user_id: user.id, category, monthly_limit: limit, active: true });
       if (result.error) throw result.error;
-      $('budgetLimit').value = ''; await loadData();
+      $('budgetLimit').value = ''; if (!(await loadData())) return;
       const spent = addUp(tx.filter(item => item.status === 'posted' && item.transaction_type === 'expense' && String(item.transaction_date).startsWith(localDate(new Date()).slice(0, 7)) && categoryKey(item.category) === categoryKey(category)).map(item => item.amount));
       msg(`Anggaran ${category} disimpan: ${rp(spent)} terpakai dari ${rp(limit)} bulan ini.`);
     } catch (error) { msg(`Gagal menyimpan anggaran: ${error.message}`, true); }
@@ -591,7 +594,7 @@
     try {
       const result = await sb.from('personal_debts').insert({ user_id: user.id, name, principal_amount: amount, paid_amount: 0, due_date: $('debtDue').value || null, status: 'active' });
       if (result.error) throw result.error;
-      $('debtForm').reset(); await loadData(); msg('Utang tersimpan. Gunakan tombol Cicil atau Bayar penuh pada kartu utang untuk menautkan pembayaran ke saldo rekening.');
+      $('debtForm').reset(); if (await loadData()) msg('Utang tersimpan. Gunakan tombol Cicil atau Bayar penuh pada kartu utang untuk menautkan pembayaran ke saldo rekening.');
     } catch (error) { msg(`Gagal menyimpan utang: ${error.message}`, true); }
   }
   async function addDebtPayment(event) {
@@ -604,7 +607,7 @@
     try {
       const result = await sb.rpc('record_personal_debt_payment', { p_debt_id: debtId, p_account_id: accountId, p_amount: amount, p_payment_date: $('paymentDate').value || localDate(new Date()), p_note: $('paymentNote').value.trim() || null });
       if (result.error) throw result.error;
-      $('paymentAmount').value = ''; $('paymentNote').value = ''; await loadData(); msg(`Pembayaran utang ${rp(amount)} tersimpan. Saldo rekening, riwayat pembayaran, laporan, dan anggaran diperbarui bersama.`);
+      $('paymentAmount').value = ''; $('paymentNote').value = ''; if (await loadData()) msg(`Pembayaran utang ${rp(amount)} tersimpan. Saldo rekening, riwayat pembayaran, laporan, dan anggaran diperbarui bersama.`);
     } catch (error) { msg(`Pembayaran utang gagal: ${error.message}`, true); }
   }
   async function addBill(event) {
@@ -615,7 +618,7 @@
     try {
       const result = await sb.from('personal_bills').insert({ user_id: user.id, name, amount, category: canonicalCategory($('billCategory').value), due_date: $('billDue').value, recurrence: $('billRecurrence').value, paid_this_cycle: 0, status: 'active' });
       if (result.error) throw result.error;
-      $('billForm').reset(); await loadData(); msg(`Tagihan ${name} tersimpan. Pilih Bayar sisa pada kartu ketika ingin membayar.`);
+      $('billForm').reset(); if (await loadData()) msg(`Tagihan ${name} tersimpan. Pilih Bayar sisa pada kartu ketika ingin membayar.`);
     } catch (error) { msg(`Gagal menyimpan tagihan: ${error.message}`, true); }
   }
   async function addBillPayment(event) {
@@ -628,7 +631,7 @@
     try {
       const result = await sb.rpc('record_personal_bill_payment', { p_bill_id: billId, p_account_id: accountId, p_amount: amount, p_payment_date: $('billPaymentDate').value || localDate(new Date()), p_note: $('billPaymentNote').value.trim() || null });
       if (result.error) throw result.error;
-      $('billPaymentAmount').value = ''; $('billPaymentNote').value = ''; await loadData(); msg(`Pembayaran tagihan ${rp(amount)} tersimpan. Saldo rekening, tagihan, laporan, dan anggaran diperbarui bersama.`);
+      $('billPaymentAmount').value = ''; $('billPaymentNote').value = ''; if (await loadData()) msg(`Pembayaran tagihan ${rp(amount)} tersimpan. Saldo rekening, tagihan, laporan, dan anggaran diperbarui bersama.`);
     } catch (error) { msg(`Pembayaran tagihan gagal: ${error.message}`, true); }
   }
   function prefillDebtPayment(debtId, action) {
@@ -661,6 +664,8 @@
   }
   function backup() {
     if (!user) return msg('Login terlebih dahulu.', true);
+    if (dataLoadInProgress) return msg('Backup ditunda karena data masih dimuat. Tunggu sampai pemuatan selesai, lalu coba lagi.', true);
+    if (loadErrors.length) return msg('Backup diblokir karena masih ada modul yang gagal dimuat. Muat ulang dan pastikan semua data berhasil dibaca sebelum membuat backup agar file tidak kehilangan data.', true);
     const data = {
       format: 'MR_ALL_IN_PERSONAL_BACKUP', version: 3, exportedAt: new Date().toISOString(), userId: user.id,
       accounts, transactions: tx, savingsGoals: goals, budgets, debts, savingsMovements: savingMoves,
@@ -671,6 +676,8 @@
   }
   async function restoreBackup() {
     if (!user) return msg('Login terlebih dahulu.', true);
+    if (dataLoadInProgress) return msg('Pemulihan ditunda karena data masih dimuat. Tunggu sampai pemuatan selesai, lalu coba lagi.', true);
+    if (loadErrors.length) return msg('Pemulihan diblokir karena data aplikasi belum termuat lengkap. Perbaiki pemuatan semua modul terlebih dahulu.', true);
     const file = $('restoreFile').files?.[0];
     if (!file) return msg('Pilih file backup JSON terlebih dahulu.', true);
     if (!confirm('Pulihkan dengan menggabungkan data berdasarkan ID? Data yang sudah ada tidak dihapus. Buat backup baru terlebih dahulu.')) return;
@@ -691,7 +698,7 @@
         if (result.error) throw new Error(`${table}: ${result.error.message}`);
       }
       $('backupMsg').textContent = 'Pemulihan selesai. Data lama tidak dihapus; periksa jumlah transaksi, saldo, target, dan tagihan.';
-      await loadData(); msg('Pemulihan backup selesai. Pastikan saldo dan jumlah tiap tabel cocok dengan sumber backup.');
+      if (await loadData()) msg('Pemulihan backup selesai. Pastikan saldo dan jumlah tiap tabel cocok dengan sumber backup.');
     } catch (error) { msg(`Pemulihan gagal: ${error.message}`, true); }
   }
 
@@ -770,7 +777,7 @@
         try {
           const result = await sb.from('personal_bills').update({ status: toggle.dataset.billToggle, updated_at: new Date().toISOString() }).eq('id', toggle.dataset.billId).eq('user_id', user.id);
           if (result.error) throw result.error;
-          await loadData(); msg(toggle.dataset.billToggle === 'paused' ? 'Jadwal tagihan dijeda. Riwayat pembayaran tetap tersimpan.' : 'Jadwal tagihan diaktifkan kembali.');
+          if (await loadData()) msg(toggle.dataset.billToggle === 'paused' ? 'Jadwal tagihan dijeda. Riwayat pembayaran tetap tersimpan.' : 'Jadwal tagihan diaktifkan kembali.');
         } catch (error) { msg(`Gagal mengubah jadwal: ${error.message}`, true); }
         return;
       }
