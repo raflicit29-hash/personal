@@ -664,6 +664,7 @@
   }
   function backup() {
     if (!user) return msg('Login terlebih dahulu.', true);
+    if (dataLoadInProgress) return msg('Backup ditunda karena data masih dimuat. Tunggu sampai pemuatan selesai, lalu coba lagi.', true);
     if (loadErrors.length) return msg('Backup diblokir karena masih ada modul yang gagal dimuat. Muat ulang dan pastikan semua data berhasil dibaca sebelum membuat backup agar file tidak kehilangan data.', true);
     const data = {
       format: 'MR_ALL_IN_PERSONAL_BACKUP', version: 3, exportedAt: new Date().toISOString(), userId: user.id,
@@ -675,6 +676,7 @@
   }
   async function restoreBackup() {
     if (!user) return msg('Login terlebih dahulu.', true);
+    if (dataLoadInProgress) return msg('Pemulihan ditunda karena data masih dimuat. Tunggu sampai pemuatan selesai, lalu coba lagi.', true);
     if (loadErrors.length) return msg('Pemulihan diblokir karena data aplikasi belum termuat lengkap. Perbaiki pemuatan semua modul terlebih dahulu.', true);
     const file = $('restoreFile').files?.[0];
     if (!file) return msg('Pilih file backup JSON terlebih dahulu.', true);
